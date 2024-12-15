@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import DataTable from '../../shared/DataTable';
 import { Plus } from 'lucide-react';
+import PlayerForm from './components/PlayerForm';
+import { api } from '../../../utils/api';  
+
 
 const BASE_URL = 'http://localhost:3001/api';
 
@@ -8,20 +11,25 @@ const PlayersList = () => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingPlayer, setEditingPlayer] = useState(null);
 
   const columns = [
     { 
       key: 'playerId', 
       label: 'Player ID',
       format: (value) => (
-        <div className="font-mono text-sm">{value}</div>
+        <div className="font-mono text-xs sm:text-sm break-all sm:break-normal">
+          {value}
+        </div>
       )
     },
     { 
       key: 'walletAddress', 
-      label: 'Wallet Address',
+      label: 'Wallet',
+      className: 'hidden md:table-cell',
       format: (value) => value ? (
-        <div className="font-mono text-sm truncate max-w-[200px]" title={value}>
+        <div className="font-mono text-xs sm:text-sm truncate max-w-[100px] lg:max-w-[200px]" title={value}>
           {value}
         </div>
       ) : '-'
@@ -36,6 +44,7 @@ const PlayersList = () => {
     { 
       key: 'stats.accuracy', 
       label: 'Accuracy',
+      className: 'hidden sm:table-cell',
       format: (value) => (
         <div className="font-medium">
           <span className={`${
@@ -49,8 +58,9 @@ const PlayersList = () => {
     { 
       key: 'lastActive', 
       label: 'Last Active',
+      className: 'hidden lg:table-cell',
       format: (value) => value ? (
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-gray-600 whitespace-nowrap">
           {new Date(value).toLocaleDateString()}
         </div>
       ) : '-'
@@ -63,11 +73,11 @@ const PlayersList = () => {
 
   const fetchPlayers = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/players`);
-      if (!response.ok) throw new Error('Failed to fetch players');
-      const data = await response.json();
-      setPlayers(data);
-      setError(null);
+      const data = await api.get('/players');
+      if (data) {
+        setPlayers(data);
+        setError(null);
+      }
     } catch (err) {
       setError(err.message);
       console.error('Error fetching players:', err);
@@ -77,21 +87,55 @@ const PlayersList = () => {
   };
 
   const handleEdit = (player) => {
-    console.log('Edit player:', player);
+    setEditingPlayer(player);
+    setIsFormOpen(true);
+  };
+
+  const handleAdd = () => {
+    setEditingPlayer(null);
+    setIsFormOpen(true);
+  };
+
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+    setEditingPlayer(null);
   };
 
   const handleDelete = async (player) => {
     if (window.confirm('Are you sure you want to delete this player?')) {
       try {
-        const response = await fetch(`${BASE_URL}/players/${player.playerId}`, {
-          method: 'DELETE'
-        });
-        if (!response.ok) throw new Error('Failed to delete player');
-        await fetchPlayers();
+        await api.delete(`/players/${player.playerId}`);
+        await fetchPlayers(); 
       } catch (err) {
         setError(err.message);
         console.error('Error deleting player:', err);
       }
+    }
+  };
+
+  const handleFormSubmit = async (formData) => {
+    try {
+      const method = editingPlayer ? 'PUT' : 'POST';
+      const url = editingPlayer 
+        ? `${BASE_URL}/players/${editingPlayer.playerId}`
+        : `${BASE_URL}/players`;
+
+      const response = await api.get(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!response.ok) throw new Error('Failed to save player');
+      
+      await fetchPlayers(); // Refresh the list
+      setIsFormOpen(false);
+      setEditingPlayer(null);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error saving player:', err);
     }
   };
 
@@ -114,30 +158,40 @@ const PlayersList = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Players Management</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Players Management</h2>
           <p className="mt-1 text-sm text-gray-500">
             Manage player accounts and view their statistics
           </p>
         </div>
         <button
-          onClick={() => console.log('Add new player')}
-          className="inline-flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          onClick={handleAdd}
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
         >
           <Plus size={20} />
           Add Player
         </button>
       </div>
       
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-        <DataTable
-          data={players}
-          columns={columns}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-        />
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <DataTable
+            data={players}
+            columns={columns}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
       </div>
+
+      {isFormOpen && (
+        <PlayerForm
+          player={editingPlayer}
+          onSubmit={handleFormSubmit}
+          onClose={handleFormClose}
+        />
+      )}
     </div>
   );
 };

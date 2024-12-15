@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import DataTable from '../../shared/DataTable';
 import { Plus } from 'lucide-react';
-
-const BASE_URL = 'http://localhost:3001/api';
+import { api } from '../../../utils/api';
 
 const DronesList = () => {
   const [drones, setDrones] = useState([]);
@@ -12,23 +11,23 @@ const DronesList = () => {
   const columns = [
     { key: 'droneId', label: 'Drone ID' },
     { key: 'playerId', label: 'Player ID' },
-    { 
-      key: 'position.x', 
+    {
+      key: 'position.x',
       label: 'Position X',
       format: (value) => value?.toFixed(2) || '0.00'
     },
-    { 
-      key: 'position.y', 
+    {
+      key: 'position.y',
       label: 'Position Y',
       format: (value) => value?.toFixed(2) || '0.00'
     },
-    { 
-      key: 'position.z', 
+    {
+      key: 'position.z',
       label: 'Position Z',
       format: (value) => value?.toFixed(2) || '0.00'
     },
-    { 
-      key: 'createdAt', 
+    {
+      key: 'createdAt',
       label: 'Created At',
       format: (value) => value ? new Date(value).toLocaleDateString() : 'N/A'
     }
@@ -40,9 +39,7 @@ const DronesList = () => {
 
   const fetchDrones = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/drones`);
-      if (!response.ok) throw new Error('Failed to fetch drones');
-      const data = await response.json();
+      const data = await api.get('/drones');
       setDrones(data);
       setError(null);
     } catch (err) {
@@ -61,10 +58,7 @@ const DronesList = () => {
   const handleDelete = async (drone) => {
     if (window.confirm('Are you sure you want to delete this drone?')) {
       try {
-        const response = await fetch(`${BASE_URL}/drones/${drone.droneId}`, {
-          method: 'DELETE'
-        });
-        if (!response.ok) throw new Error('Failed to delete drone');
+        await api.delete(`/drones/${drone.droneId}`);
         await fetchDrones(); // Refresh the list
       } catch (err) {
         setError(err.message);
@@ -91,24 +85,33 @@ const DronesList = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900">Drones Management</h1>
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Drones Management</h2>
+          <p className="mt-1 text-sm text-gray-500">
+            Manage drones and their positions
+          </p>
+        </div>
         <button
           onClick={() => console.log('Add new drone')}
-          className="flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+          className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
         >
           <Plus size={20} />
           Add Drone
         </button>
       </div>
-      
-      <DataTable
-        data={drones}
-        columns={columns}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <DataTable
+            data={drones}
+            columns={columns}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
+      </div>
     </div>
   );
 };

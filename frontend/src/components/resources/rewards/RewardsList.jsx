@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import DataTable from '../../shared/DataTable';
 import { Plus } from 'lucide-react';
+import { api } from '../../../utils/api';  
 
 const BASE_URL = 'http://localhost:3001/api';
 
@@ -43,9 +44,7 @@ const RewardsList = () => {
 
   const fetchRewards = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/reward-history`);
-      if (!response.ok) throw new Error('Failed to fetch rewards');
-      const data = await response.json();
+      const data = await api.get(`/rewards`);
       setRewards(data);
       setError(null);
     } catch (err) {
@@ -63,10 +62,7 @@ const RewardsList = () => {
   const handleDelete = async (reward) => {
     if (window.confirm('Are you sure you want to delete this reward record?')) {
       try {
-        const response = await fetch(`${BASE_URL}/reward-history/${reward._id}`, {
-          method: 'DELETE'
-        });
-        if (!response.ok) throw new Error('Failed to delete reward');
+        await api.delete(`/rewards/${reward._id}`);
         await fetchRewards();
       } catch (err) {
         setError(err.message);

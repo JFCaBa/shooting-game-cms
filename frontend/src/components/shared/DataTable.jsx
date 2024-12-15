@@ -14,69 +14,56 @@ const DataTable = ({ data = [], columns = [], onEdit, onDelete }) => {
 
   const getSortedData = () => {
     if (!sortConfig.key) return data;
-
     return [...data].sort((a, b) => {
       const aValue = sortConfig.key.split('.').reduce((obj, key) => obj?.[key], a);
       const bValue = sortConfig.key.split('.').reduce((obj, key) => obj?.[key], b);
-
-      if (aValue < bValue) {
-        return sortConfig.direction === 'asc' ? -1 : 1;
-      }
-      if (aValue > bValue) {
-        return sortConfig.direction === 'asc' ? 1 : -1;
-      }
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
     });
   };
 
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
+      <table className="w-full">
+        <thead>
+          <tr className="border-b">
             {columns.map((column) => (
               <th
                 key={column.key}
                 onClick={() => sortData(column.key)}
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                className={`px-4 py-2 text-left cursor-pointer ${column.className || ''}`}
               >
-                <div className="flex items-center gap-2">
-                  {column.label}
-                  {sortConfig.key === column.key && (
-                    <span>{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
-                  )}
-                </div>
+                {column.label}
               </th>
             ))}
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
+            <th className="px-4 py-2 text-left w-24">Actions</th>
           </tr>
         </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
+        <tbody>
           {getSortedData().map((item, index) => (
-            <tr key={index} className="hover:bg-gray-50">
+            <tr key={index} className="border-b hover:bg-gray-50">
               {columns.map((column) => {
                 const value = column.key.split('.').reduce((obj, key) => obj?.[key], item);
                 return (
-                  <td key={column.key} className="px-6 py-4 whitespace-nowrap">
+                  <td key={column.key} className={`px-4 py-2 ${column.className || ''}`}>
                     {column.format ? column.format(value) : value}
                   </td>
                 );
               })}
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div className="flex gap-2 justify-end">
+              <td className="px-4 py-2">
+                <div className="flex gap-2">
                   <button
                     onClick={() => onEdit(item)}
-                    className="text-blue-600 hover:text-blue-900 p-1 hover:bg-blue-50 rounded"
+                    className="p-1 hover:bg-gray-100 rounded"
                   >
-                    <Edit size={16} />
+                    <Edit size={18} />
                   </button>
                   <button
                     onClick={() => onDelete(item)}
-                    className="text-red-600 hover:text-red-900 p-1 hover:bg-red-50 rounded"
+                    className="p-1 hover:bg-gray-100 rounded"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={18} />
                   </button>
                 </div>
               </td>

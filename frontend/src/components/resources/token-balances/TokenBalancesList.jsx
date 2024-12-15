@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import DataTable from '../../shared/DataTable';
 import { Plus } from 'lucide-react';
+import { api } from '../../../utils/api';  
 
 const BASE_URL = 'http://localhost:3001/api';
 
@@ -34,9 +35,7 @@ const TokenBalancesList = () => {
 
   const fetchBalances = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/token-balances`);
-      if (!response.ok) throw new Error('Failed to fetch token balances');
-      const data = await response.json();
+      const data = await api.get(`/token-balances`)
       setBalances(data);
       setError(null);
     } catch (err) {
@@ -54,10 +53,11 @@ const TokenBalancesList = () => {
   const handleDelete = async (balance) => {
     if (window.confirm('Are you sure you want to delete this token balance record?')) {
       try {
-        const response = await fetch(`${BASE_URL}/token-balances/${balance.playerId}`, {
+        const response = await api.get(`${BASE_URL}/token-balances/${balance.playerId}`, {
           method: 'DELETE'
         });
         if (!response.ok) throw new Error('Failed to delete token balance');
+        await api.delete(`/token-balances/${balance.playerId}`);
         await fetchBalances();
       } catch (err) {
         setError(err.message);
