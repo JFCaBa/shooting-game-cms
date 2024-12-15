@@ -35,30 +35,30 @@ const Layout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-2xl font-semibold text-gray-900">Shooting Game CMS</h1>
+      <header className="bg-white border-b">
+        <div className="px-4 py-3">
+          <h1 className="text-2xl">Shooting Game CMS</h1>
         </div>
       </header>
 
-      <div className="flex h-[calc(100vh-64px)]">
+      <div className="flex">
         {/* Sidebar */}
-        <nav className="w-64 bg-white border-r border-gray-200 py-4">
-          <ul className="space-y-1 px-2">
+        <nav className="w-64 border-r min-h-screen">
+          <ul className="py-2">
             {navItems.map(({ id, icon: Icon, label }) => (
               <li key={id}>
                 <button
                   onClick={() => setActiveTab(id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  className={`w-full flex items-center gap-3 px-4 py-2 text-left transition-colors ${
                     activeTab === id 
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-gray-100'
+                      : 'hover:bg-gray-50'
                   }`}
                 >
-                  <Icon size={18} />
-                  {label}
+                  <Icon className="shrink-0" size={20} />
+                  <span className="text-base">{label}</span>
                 </button>
               </li>
             ))}
@@ -66,7 +66,7 @@ const Layout = () => {
         </nav>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto p-6">
+        <main className="flex-1 p-6">
           {renderContent()}
         </main>
       </div>

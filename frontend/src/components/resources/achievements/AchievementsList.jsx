@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import DataTable from '../../shared/DataTable';
 import { Plus } from 'lucide-react';
+import { api } from '../../../utils/api';  
 
 const BASE_URL = 'http://localhost:3001/api';
 
@@ -39,9 +40,7 @@ const AchievementsList = () => {
 
   const fetchAchievements = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/achievements`);
-      if (!response.ok) throw new Error('Failed to fetch achievements');
-      const data = await response.json();
+      const data = await api.get(`/achievements`);
       setAchievements(data);
       setError(null);
     } catch (err) {
@@ -60,10 +59,7 @@ const AchievementsList = () => {
   const handleDelete = async (achievement) => {
     if (window.confirm('Are you sure you want to delete this achievement?')) {
       try {
-        const response = await fetch(`${BASE_URL}/achievements/${achievement._id}`, {
-          method: 'DELETE'
-        });
-        if (!response.ok) throw new Error('Failed to delete achievement');
+        await api.delete(`/achievements/${achievement._id}`);
         await fetchAchievements(); // Refresh the list
       } catch (err) {
         setError(err.message);
