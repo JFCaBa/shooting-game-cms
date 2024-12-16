@@ -4,7 +4,7 @@ const Drone = require('../models/Drone');
 const droneController = {
     async getAll(req, res) {
         try {
-            const drones = await Drone.find();
+            const drones = await Drone.find().sort({ createdAt: -1 });
             res.json(drones);
         } catch (error) {
             res.status(500).json({ message: error.message });
