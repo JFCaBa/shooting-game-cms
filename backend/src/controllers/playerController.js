@@ -4,7 +4,11 @@ const Player = require('../models/Player');
 const playerController = {
     async getAll(req, res) {
         try {
-            const players = await Player.find();
+            const players = await Player.find().sort({
+                'stats.kills': -1, // Sort by kills in descending order
+                'stats.hits': -1,  // Sort by hits in descending order
+                'stats.droneHits': -1 // Sort by droneHits in descending order
+            });
             res.json(players);
         } catch (error) {
             res.status(500).json({ message: error.message });

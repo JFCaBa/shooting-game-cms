@@ -11,21 +11,21 @@ const DronesList = () => {
   const columns = [
     { key: 'droneId', label: 'Drone ID' },
     { key: 'playerId', label: 'Player ID' },
-    {
-      key: 'position.x',
-      label: 'Position X',
-      format: (value) => value?.toFixed(2) || '0.00'
-    },
-    {
-      key: 'position.y',
-      label: 'Position Y',
-      format: (value) => value?.toFixed(2) || '0.00'
-    },
-    {
-      key: 'position.z',
-      label: 'Position Z',
-      format: (value) => value?.toFixed(2) || '0.00'
-    },
+    // {
+    //   key: 'position.x',
+    //   label: 'Position X',
+    //   format: (value) => value?.toFixed(2) || '0.00'
+    // },
+    // {
+    //   key: 'position.y',
+    //   label: 'Position Y',
+    //   format: (value) => value?.toFixed(2) || '0.00'
+    // },
+    // {
+    //   key: 'position.z',
+    //   label: 'Position Z',
+    //   format: (value) => value?.toFixed(2) || '0.00'
+    // },
     {
       key: 'createdAt',
       label: 'Created At',

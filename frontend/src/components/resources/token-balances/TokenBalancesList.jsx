@@ -19,11 +19,6 @@ const TokenBalancesList = () => {
       key: 'mintedBalance', 
       label: 'Minted Balance',
       format: (value) => value?.toLocaleString() || '0'
-    },
-    { 
-      key: 'lastUpdate', 
-      label: 'Last Updated',
-      format: (value) => value ? new Date(value).toLocaleString() : 'N/A'
     }
   ];
 

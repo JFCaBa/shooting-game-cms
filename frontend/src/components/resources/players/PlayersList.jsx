@@ -23,16 +23,6 @@ const PlayersList = () => {
       )
     },
     { 
-      key: 'walletAddress', 
-      label: 'Wallet',
-      className: 'hidden md:table-cell',
-      format: (value) => value ? (
-        <div className="font-mono text-xs sm:text-sm truncate max-w-[100px] lg:max-w-[200px]" title={value}>
-          {value}
-        </div>
-      ) : '-'
-    },
-    { 
       key: 'stats.kills', 
       label: 'Kills',
       format: (value) => (
@@ -40,17 +30,17 @@ const PlayersList = () => {
       )
     },
     { 
-      key: 'stats.accuracy', 
-      label: 'Accuracy',
-      className: 'hidden sm:table-cell',
+      key: 'stats.hits', 
+      label: 'Hits',
       format: (value) => (
-        <div className="font-medium">
-          <span className={`${
-            value > 50 ? 'text-green-600' : value > 25 ? 'text-yellow-600' : 'text-red-600'
-          }`}>
-            {(value || 0).toFixed(1)}%
-          </span>
-        </div>
+        <div className="font-semibold text-gray-900">{value || 0}</div>
+      )
+    },
+    { 
+      key: 'stats.droneHits', 
+      label: 'Drone Hits',
+      format: (value) => (
+        <div className="font-semibold text-gray-900">{value || 0}</div>
       )
     },
     { 
