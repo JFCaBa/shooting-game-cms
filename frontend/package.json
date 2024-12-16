@@ -20,9 +20,9 @@
     "dotenv": "^16.4.5"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "HOST=0.0.0.0 PORT=3002 react-scripts start",
+    "build": "PORT=3002 react-scripts build",
+    "test": "PORT=3002 react-scripts test",
     "eject": "react-scripts eject"
   },
   "proxy": "http://localhost:3001",

@@ -3,8 +3,6 @@ import DataTable from '../../shared/DataTable';
 import { Plus } from 'lucide-react';
 import { api } from '../../../utils/api';  
 
-const BASE_URL = 'http://localhost:3001/api';
-
 const AchievementsList = () => {
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);

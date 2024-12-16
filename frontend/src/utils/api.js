@@ -1,6 +1,6 @@
 // src/utils/api.js
 
-const BASE_URL = 'http://localhost:3001/api';
+const BASE_URL = '/api';
 
 const getAuthHeader = () => {
   const token = localStorage.getItem('token');

@@ -5,8 +5,6 @@ import PlayerForm from './components/PlayerForm';
 import { api } from '../../../utils/api';  
 
 
-const BASE_URL = 'http://localhost:3001/api';
-
 const PlayersList = () => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -117,8 +115,8 @@ const PlayersList = () => {
     try {
       const method = editingPlayer ? 'PUT' : 'POST';
       const url = editingPlayer 
-        ? `${BASE_URL}/players/${editingPlayer.playerId}`
-        : `${BASE_URL}/players`;
+        ? `/api/players/${editingPlayer.playerId}`
+        : `/api/players`;
 
       const response = await api.get(url, {
         method,
