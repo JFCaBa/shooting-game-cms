@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import DataTable from '../../shared/DataTable';
 import { Plus } from 'lucide-react';
 import { api } from '../../../utils/api';
-import DroneConfigForm from './components/DroneConfigForm';
+import DroneConfigForm from './components/DroneConfigurationForm';
 
 const DronesList = () => {
   const [drones, setDrones] = useState([]);
@@ -13,21 +13,6 @@ const DronesList = () => {
   const columns = [
     { key: 'droneId', label: 'Drone ID' },
     { key: 'playerId', label: 'Player ID' },
-    {
-      key: 'position.x',
-      label: 'Position X',
-      format: (value) => value?.toFixed(2) || '0.00'
-    },
-    {
-      key: 'position.y',
-      label: 'Position Y',
-      format: (value) => value?.toFixed(2) || '0.00'
-    },
-    {
-      key: 'position.z',
-      label: 'Position Z',
-      format: (value) => value?.toFixed(2) || '0.00'
-    }
   ];
 
   useEffect(() => {
