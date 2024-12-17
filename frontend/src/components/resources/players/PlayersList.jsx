@@ -4,13 +4,18 @@ import { Plus } from 'lucide-react';
 import PlayerForm from './components/PlayerForm';
 import { api } from '../../../utils/api';  
 
-
 const PlayersList = () => {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState(null);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+    limit: 10
+  });
 
   const columns = [
     { 
@@ -56,14 +61,22 @@ const PlayersList = () => {
   ];
 
   useEffect(() => {
-    fetchPlayers();
+    fetchPlayers(1);
   }, []);
 
-  const fetchPlayers = async () => {
+  const fetchPlayers = async (page) => {
     try {
-      const data = await api.get('/players');
-      if (data) {
-        setPlayers(data);
+      setLoading(true);
+      const response = await api.get(`/players?page=${page}&limit=${pagination.limit}`);
+      
+      if (response) {
+        setPlayers(response.data);
+        setPagination({
+          ...pagination,
+          page: response.pagination.page,
+          totalPages: response.pagination.totalPages,
+          total: response.pagination.total
+        });
         setError(null);
       }
     } catch (err) {
@@ -72,6 +85,10 @@ const PlayersList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    fetchPlayers(newPage);
   };
 
   const handleEdit = (player) => {
@@ -93,7 +110,7 @@ const PlayersList = () => {
     if (window.confirm('Are you sure you want to delete this player?')) {
       try {
         await api.delete(`/players/${player.playerId}`);
-        await fetchPlayers(); 
+        await fetchPlayers(pagination.page); 
       } catch (err) {
         setError(err.message);
         console.error('Error deleting player:', err);
@@ -118,7 +135,7 @@ const PlayersList = () => {
 
       if (!response.ok) throw new Error('Failed to save player');
       
-      await fetchPlayers(); // Refresh the list
+      await fetchPlayers(pagination.page); // Refresh current page
       setIsFormOpen(false);
       setEditingPlayer(null);
     } catch (err) {
@@ -163,14 +180,14 @@ const PlayersList = () => {
       </div>
       
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <DataTable
-            data={players}
-            columns={columns}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
-        </div>
+        <DataTable
+          data={players}
+          columns={columns}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+        />
       </div>
 
       {isFormOpen && (
