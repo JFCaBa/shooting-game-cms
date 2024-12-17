@@ -1,20 +1,42 @@
-// src/controllers/playerController.js
 const Player = require('../models/Player');
 
 const playerController = {
     async getAll(req, res) {
         try {
-            const players = await Player.find().sort({
-                'stats.kills': -1, // Sort by kills in descending order
-                'stats.hits': -1,  // Sort by hits in descending order
-                'stats.droneHits': -1 // Sort by droneHits in descending order
+            // Get pagination parameters from query string
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const skip = (page - 1) * limit;
+
+            // Get total count for pagination
+            const total = await Player.countDocuments();
+
+            // Get paginated data
+            const players = await Player.find()
+                .sort({
+                    'stats.kills': -1,
+                    'stats.hits': -1,
+                    'stats.droneHits': -1
+                })
+                .skip(skip)
+                .limit(limit);
+
+            // Send response with pagination metadata
+            res.json({
+                data: players,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
             });
-            res.json(players);
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
     },
 
+    // Rest of the controller methods remain the same
     async getOne(req, res) {
         try {
             const player = await Player.findOne({ playerId: req.params.id });
