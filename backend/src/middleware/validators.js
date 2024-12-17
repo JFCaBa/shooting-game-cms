@@ -16,6 +16,20 @@ const validate = validations => {
     };
 };
 
+// Pagination Validation
+const paginationValidation = {
+    validate: validate([
+        query('page')
+            .optional()
+            .isInt({ min: 1 })
+            .withMessage('Page must be a positive integer'),
+        query('limit')
+            .optional()
+            .isInt({ min: 1, max: 100 })
+            .withMessage('Limit must be between 1 and 100')
+    ])
+};
+
 // Drone Validations
 const droneValidation = {
     create: validate([
@@ -53,19 +67,6 @@ const playerValidation = {
         body('stats.deaths').optional().isInt({ min: 0 }).withMessage('Deaths must be a non-negative integer'),
         body('stats.droneHits').optional().isInt({ min: 0 }).withMessage('Drone hits must be a non-negative integer'),
         body('stats.accuracy').optional().isFloat({ min: 0, max: 100 }).withMessage('Accuracy must be between 0 and 100')
-    ])
-};
-
-const paginationValidation = {
-    validate: validate([
-        query('page')
-            .optional()
-            .isInt({ min: 1 })
-            .withMessage('Page must be a positive integer'),
-        query('limit')
-            .optional()
-            .isInt({ min: 1, max: 100 })
-            .withMessage('Limit must be between 1 and 100')
     ])
 };
 

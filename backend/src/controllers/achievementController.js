@@ -3,6 +3,10 @@ const Achievement = require('../models/Achievement');
 const achievementController = {
     async getAll(req, res) {
         try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const skip = (page - 1) * limit;
+
             const { playerId, type } = req.query;
             
             // Build query based on filters
@@ -10,9 +14,25 @@ const achievementController = {
             if (playerId) query.playerId = playerId;
             if (type) query.type = type;
 
+            // Get total count for pagination
+            const total = await Achievement.countDocuments(query);
+
+            // Get paginated data
             const achievements = await Achievement.find(query)
-                .sort({ unlockedAt: -1 });
-            res.json(achievements);
+                .sort({ unlockedAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            // Send response with pagination metadata
+            res.json({
+                data: achievements,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            });
         } catch (error) {
             res.status(500).json({ message: error.message });
         }

@@ -1,24 +1,25 @@
-import { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
 import Layout from './components/layout/Layout';
 import Login from './components/auth/Login';
 
-function App() {
-  const [token, setToken] = useState(localStorage.getItem('token'));
-
-  const handleLogin = (newToken) => {
-    setToken(newToken);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
-  };
+// Separate component for content that uses hooks
+function AppContent() {
+  const { token, login } = useAuth();
 
   if (!token) {
-    return <Login onLogin={handleLogin} />;
+    return <Login onLogin={login} />;
   }
 
-  return <Layout onLogout={handleLogout} />;
+  return <Layout />;
+}
+
+// Main App component that provides context
+function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
 }
 
 export default App;

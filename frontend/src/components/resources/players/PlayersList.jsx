@@ -21,6 +21,8 @@ const PlayersList = () => {
     { 
       key: 'playerId', 
       label: 'Player ID',
+      filterable: true,
+      filterType: 'text',
       format: (value) => (
         <div className="font-mono text-xs sm:text-sm break-all sm:break-normal">
           {value}
@@ -30,6 +32,8 @@ const PlayersList = () => {
     { 
       key: 'stats.kills', 
       label: 'Kills',
+      filterable: true,
+      filterType: 'number',
       format: (value) => (
         <div className="font-semibold text-gray-900">{value || 0}</div>
       )
@@ -37,6 +41,8 @@ const PlayersList = () => {
     { 
       key: 'stats.hits', 
       label: 'Hits',
+      filterable: true,
+      filterType: 'number',
       format: (value) => (
         <div className="font-semibold text-gray-900">{value || 0}</div>
       )
@@ -44,6 +50,8 @@ const PlayersList = () => {
     { 
       key: 'stats.droneHits', 
       label: 'Drone Hits',
+      filterable: true,
+      filterType: 'number',
       format: (value) => (
         <div className="font-semibold text-gray-900">{value || 0}</div>
       )
@@ -51,6 +59,8 @@ const PlayersList = () => {
     { 
       key: 'lastActive', 
       label: 'Last Active',
+      filterable: true,
+      filterType: 'date',
       className: 'hidden lg:table-cell',
       format: (value) => value ? (
         <div className="text-sm text-gray-600 whitespace-nowrap">
@@ -64,19 +74,39 @@ const PlayersList = () => {
     fetchPlayers(1);
   }, []);
 
-  const fetchPlayers = async (page) => {
+  const buildQueryString = (page, filters = {}) => {
+    const queryParams = new URLSearchParams();
+    
+    // Add pagination params
+    queryParams.append('page', page);
+    queryParams.append('limit', pagination.limit);
+    
+    // Add filter params
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        // Handle nested keys (e.g., stats.kills)
+        const paramName = key.includes('.') ? `${key.split('.')[0]}[${key.split('.')[1]}]` : key;
+        queryParams.append(paramName, value);
+      }
+    });
+    
+    return queryParams.toString();
+  };
+
+  const fetchPlayers = async (page, filters = {}) => {
     try {
       setLoading(true);
-      const response = await api.get(`/players?page=${page}&limit=${pagination.limit}`);
+      const queryString = buildQueryString(page, filters);
+      const response = await api.get(`/players?${queryString}`);
       
-      if (response) {
+      if (response && response.data) {
         setPlayers(response.data);
-        setPagination({
-          ...pagination,
+        setPagination(prev => ({
+          ...prev,
           page: response.pagination.page,
           totalPages: response.pagination.totalPages,
           total: response.pagination.total
-        });
+        }));
         setError(null);
       }
     } catch (err) {
@@ -89,6 +119,10 @@ const PlayersList = () => {
 
   const handlePageChange = (newPage) => {
     fetchPlayers(newPage);
+  };
+
+  const handleFilter = (filters) => {
+    fetchPlayers(1, filters); // Reset to first page when filtering
   };
 
   const handleEdit = (player) => {
@@ -120,22 +154,14 @@ const PlayersList = () => {
 
   const handleFormSubmit = async (formData) => {
     try {
-      const method = editingPlayer ? 'PUT' : 'POST';
+      const method = editingPlayer ? 'put' : 'post';
       const url = editingPlayer 
-        ? `/api/players/${editingPlayer.playerId}`
-        : `/api/players`;
+        ? `/players/${editingPlayer.playerId}`
+        : `/players`;
 
-      const response = await api.get(url, {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) throw new Error('Failed to save player');
+      await api[method](url, formData);
       
-      await fetchPlayers(pagination.page); // Refresh current page
+      await fetchPlayers(pagination.page);
       setIsFormOpen(false);
       setEditingPlayer(null);
     } catch (err) {
@@ -187,6 +213,7 @@ const PlayersList = () => {
           onDelete={handleDelete}
           pagination={pagination}
           onPageChange={handlePageChange}
+          onFilter={handleFilter}
         />
       </div>
 
