@@ -4,17 +4,39 @@ const tokenBalanceController = {
     // Get all balances sorted by totalBalance and mintedBalance
     async getAll(req, res) {
         try {
-            const balances = await Player.find({}, { playerId: 1, pendingBalance: 1, mintedBalance: 1 })
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const skip = (page - 1) * limit;
+
+            // Get total count for pagination
+            const total = await Player.countDocuments();
+
+            // Get paginated data
+            const balances = await Player.find(
+                {}, 
+                { playerId: 1, pendingBalance: 1, mintedBalance: 1 }
+            )
                 .sort({
                     mintedBalance: -1,
                     pendingBalance: -1
-                });
-            res.json(balances);
+                })
+                .skip(skip)
+                .limit(limit);
+
+            // Send response with pagination metadata
+            res.json({
+                data: balances,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            });
         } catch (error) {
             res.status(500).json({ message: error.message });
         }
     },
-
     // Get a specific player's balance
     async getOne(req, res) {
         try {

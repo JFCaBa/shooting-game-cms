@@ -8,6 +8,13 @@ const AchievementsList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+    limit: 10
+  });
+
   const columns = [
     { key: 'playerId', label: 'Player ID' },
     { 
@@ -36,17 +43,31 @@ const AchievementsList = () => {
     fetchAchievements();
   }, []);
 
-  const fetchAchievements = async () => {
+  const fetchAchievements = async (page = 1) => {
     try {
-      const data = await api.get(`/achievements`);
-      setAchievements(data);
-      setError(null);
+      setLoading(true);
+      const response = await api.get(`/achievements?page=${page}&limit=${pagination.limit}`);
+      
+      if (response && response.data) {
+        setAchievements(response.data);
+        setPagination(prev => ({
+          ...prev,
+          page: response.pagination.page,
+          totalPages: response.pagination.totalPages,
+          total: response.pagination.total
+        }));
+        setError(null);
+      }
     } catch (err) {
       setError(err.message);
       console.error('Error fetching achievements:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    fetchAchievements(newPage);
   };
 
   const handleEdit = (achievement) => {
@@ -150,6 +171,8 @@ const AchievementsList = () => {
         columns={columns}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        pagination={pagination}
+        onPageChange={handlePageChange}
       />
     </div>
   );

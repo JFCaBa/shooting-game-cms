@@ -10,6 +10,13 @@ const DronesList = () => {
   const [error, setError] = useState(null);
   const [showConfig, setShowConfig] = useState(false);
 
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+    limit: 10
+  });
+
   const columns = [
     { key: 'droneId', label: 'Drone ID' },
     { key: 'playerId', label: 'Player ID' },
@@ -19,17 +26,31 @@ const DronesList = () => {
     fetchDrones();
   }, []);
 
-  const fetchDrones = async () => {
+  const fetchDrones = async (page = 1) => {
     try {
-      const data = await api.get('/drones');
-      setDrones(data);
-      setError(null);
+      setLoading(true);
+      const response = await api.get(`/drones?page=${page}&limit=${pagination.limit}`);
+      
+      if (response && response.data) {
+        setDrones(response.data);
+        setPagination(prev => ({
+          ...prev,
+          page: response.pagination.page,
+          totalPages: response.pagination.totalPages,
+          total: response.pagination.total
+        }));
+        setError(null);
+      }
     } catch (err) {
       setError(err.message);
       console.error('Error fetching drones:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    fetchDrones(newPage);
   };
 
   const handleEdit = (drone) => {
@@ -105,12 +126,14 @@ const DronesList = () => {
           </p>
         </div>
         <div className="overflow-x-auto">
-          <DataTable
-            data={drones}
-            columns={columns}
-            onEdit={handleEdit}
-            onDelete={handleDelete}
-          />
+        <DataTable
+          data={drones}
+          columns={columns}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+          pagination={pagination}
+          onPageChange={handlePageChange}
+        />
         </div>
       </div>
     </div>

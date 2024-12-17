@@ -3,10 +3,13 @@ const RewardHistory = require('../models/RewardHistory');
 const rewardHistoryController = {
     async getAll(req, res) {
         try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const skip = (page - 1) * limit;
+
+            const query = {};
             const { playerId, rewardType, startDate, endDate } = req.query;
             
-            // Build query based on filters
-            const query = {};
             if (playerId) query.playerId = playerId;
             if (rewardType) query.rewardType = rewardType;
             if (startDate || endDate) {
@@ -15,9 +18,25 @@ const rewardHistoryController = {
                 if (endDate) query.timestamp.$lte = new Date(endDate);
             }
 
+            // Get total count for pagination
+            const total = await RewardHistory.countDocuments(query);
+
+            // Get paginated data
             const rewards = await RewardHistory.find(query)
-                .sort({ timestamp: -1 });
-            res.json(rewards);
+                .sort({ timestamp: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            // Send response with pagination metadata
+            res.json({
+                data: rewards,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            });
         } catch (error) {
             res.status(500).json({ message: error.message });
         }

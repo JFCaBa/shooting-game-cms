@@ -8,6 +8,13 @@ const TokenBalancesList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+    limit: 10
+  });
+
   const columns = [
     { key: 'playerId', label: 'Player ID' },
     { 
@@ -26,11 +33,21 @@ const TokenBalancesList = () => {
     fetchBalances();
   }, []);
 
-  const fetchBalances = async () => {
+  const fetchBalances = async (page = 1) => {
     try {
-      const data = await api.get(`/token-balances`)
-      setBalances(data);
-      setError(null);
+      setLoading(true);
+      const response = await api.get(`/token-balances?page=${page}&limit=${pagination.limit}`);
+      
+      if (response && response.data) {
+        setBalances(response.data);
+        setPagination(prev => ({
+          ...prev,
+          page: response.pagination.page,
+          totalPages: response.pagination.totalPages,
+          total: response.pagination.total
+        }));
+        setError(null);
+      }
     } catch (err) {
       setError(err.message);
       console.error('Error fetching token balances:', err);
@@ -38,6 +55,11 @@ const TokenBalancesList = () => {
       setLoading(false);
     }
   };
+
+  const handlePageChange = (newPage) => {
+    fetchBalances(newPage);
+  };
+
 
   const handleEdit = (balance) => {
     console.log('Edit balance:', balance);
@@ -138,6 +160,8 @@ const TokenBalancesList = () => {
         columns={columns}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        pagination={pagination}
+        onPageChange={handlePageChange}
       />
     </div>
   );

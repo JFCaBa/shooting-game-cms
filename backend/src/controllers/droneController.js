@@ -4,8 +4,29 @@ const Drone = require('../models/Drone');
 const droneController = {
     async getAll(req, res) {
         try {
-            const drones = await Drone.find().sort({ createdAt: -1 });
-            res.json(drones);
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const skip = (page - 1) * limit;
+
+            // Get total count for pagination
+            const total = await Drone.countDocuments();
+
+            // Get paginated data with sort
+            const drones = await Drone.find()
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            // Send response with pagination metadata
+            res.json({
+                data: drones,
+                pagination: {
+                    page,
+                    limit,
+                    total,
+                    totalPages: Math.ceil(total / limit)
+                }
+            });
         } catch (error) {
             res.status(500).json({ message: error.message });
         }

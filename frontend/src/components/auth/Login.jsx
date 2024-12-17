@@ -4,10 +4,12 @@ const Login = ({ onLogin }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setIsLoading(true);
 
         try {
             const response = await fetch('/api/auth/login', {
@@ -18,16 +20,30 @@ const Login = ({ onLogin }) => {
                 body: JSON.stringify({ username, password }),
             });
 
+            const data = await response.json();
+            
             if (!response.ok) {
-                const data = await response.json();
+                // Handle specific error cases
+                if (response.status === 401) {
+                    throw new Error('Invalid username or password');
+                }
                 throw new Error(data.message || 'Login failed');
             }
 
-            const { token } = await response.json();
-            localStorage.setItem('token', token);
-            onLogin(token);
+            if (!data.token) {
+                throw new Error('No token received from server');
+            }
+
+            onLogin(data.token);
         } catch (err) {
-            setError(err.message);
+            // Handle network errors separately
+            if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
+                setError('Unable to connect to server. Please try again later.');
+            } else {
+                setError(err.message);
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -57,6 +73,7 @@ const Login = ({ onLogin }) => {
                                 placeholder="Username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
+                                disabled={isLoading}
                             />
                         </div>
                         <div>
@@ -70,6 +87,7 @@ const Login = ({ onLogin }) => {
                                 placeholder="Password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
+                                disabled={isLoading}
                             />
                         </div>
                     </div>
@@ -77,9 +95,10 @@ const Login = ({ onLogin }) => {
                     <div>
                         <button
                             type="submit"
-                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled={isLoading}
                         >
-                            Sign in
+                            {isLoading ? 'Signing in...' : 'Sign in'}
                         </button>
                     </div>
                 </form>

@@ -8,6 +8,13 @@ const RewardsList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const [pagination, setPagination] = useState({
+    page: 1,
+    totalPages: 1,
+    total: 0,
+    limit: 10
+  });
+
   const columns = [
     { key: 'playerId', label: 'Player ID' },
     { 
@@ -40,17 +47,31 @@ const RewardsList = () => {
     fetchRewards();
   }, []);
 
-  const fetchRewards = async () => {
+  const fetchRewards = async (page = 1) => {
     try {
-      const data = await api.get(`/rewards`);
-      setRewards(data);
-      setError(null);
+      setLoading(true);
+      const response = await api.get(`/rewards?page=${page}&limit=${pagination.limit}`);
+      
+      if (response && response.data) {
+        setRewards(response.data);
+        setPagination(prev => ({
+          ...prev,
+          page: response.pagination.page,
+          totalPages: response.pagination.totalPages,
+          total: response.pagination.total
+        }));
+        setError(null);
+      }
     } catch (err) {
       setError(err.message);
       console.error('Error fetching rewards:', err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    fetchRewards(newPage);
   };
 
   const handleEdit = (reward) => {
@@ -143,12 +164,14 @@ const RewardsList = () => {
           </div>
         </div>
       </div>
-      
+
       <DataTable
         data={rewards}
         columns={columns}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        pagination={pagination}
+        onPageChange={handlePageChange}
       />
     </div>
   );
