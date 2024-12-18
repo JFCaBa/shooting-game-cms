@@ -1,15 +1,14 @@
 import { useState } from 'react';
 
 const Login = ({ onLogin }) => {
+    const { login } = useAuth();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        setIsLoading(true);
 
         try {
             const response = await fetch('/api/auth/login', {
@@ -23,27 +22,12 @@ const Login = ({ onLogin }) => {
             const data = await response.json();
             
             if (!response.ok) {
-                // Handle specific error cases
-                if (response.status === 401) {
-                    throw new Error('Invalid username or password');
-                }
                 throw new Error(data.message || 'Login failed');
             }
 
-            if (!data.token) {
-                throw new Error('No token received from server');
-            }
-
-            onLogin(data.token);
+            login(data.token);
         } catch (err) {
-            // Handle network errors separately
-            if (err.name === 'TypeError' && err.message === 'Failed to fetch') {
-                setError('Unable to connect to server. Please try again later.');
-            } else {
-                setError(err.message);
-            }
-        } finally {
-            setIsLoading(false);
+            setError(err.message);
         }
     };
 
