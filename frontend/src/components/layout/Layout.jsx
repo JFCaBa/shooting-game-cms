@@ -5,6 +5,7 @@ import DronesList from '../resources/drones/DronesList';
 import AchievementsList from '../resources/achievements/AchievementsList';
 import RewardsList from '../resources/rewards/RewardsList';
 import TokenBalancesList from '../resources/token-balances/TokenBalancesList';
+import GameMap from '../resources/map/GameMap';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Layout = () => {
@@ -16,7 +17,8 @@ const Layout = () => {
         { id: 'drones', icon: Database, label: 'Drones' },
         { id: 'achievements', icon: Award, label: 'Achievements' },
         { id: 'rewards', icon: History, label: 'Rewards' },
-        { id: 'balances', icon: Wallet, label: 'Token Balances' }
+        { id: 'balances', icon: Wallet, label: 'Token Balances' },
+        { id: 'map', icon: Map, label: 'Game Map' } 
     ];
 
     const renderContent = () => {
@@ -31,6 +33,8 @@ const Layout = () => {
                 return <RewardsList />;
             case 'balances':
                 return <TokenBalancesList />;
+            case 'map':                
+                return <GameMap />;
             default:
                 return <PlayersList />;
         }
