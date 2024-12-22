@@ -5,7 +5,7 @@ const playerController = {
         try {
             // Get pagination parameters from query string
             const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 10;
+            const limit = parseInt(req.query.limit) || 1000;
             const skip = (page - 1) * limit;
 
             // Get total count for pagination
@@ -16,7 +16,8 @@ const playerController = {
                 .sort({
                     'stats.kills': -1,
                     'stats.hits': -1,
-                    'stats.droneHits': -1
+                    'stats.droneHits': -1,
+                    'lastActive': -1
                 })
                 .skip(skip)
                 .limit(limit);
@@ -78,6 +79,25 @@ const playerController = {
             res.json({ message: 'Player deleted' });
         } catch (error) {
             res.status(500).json({ message: error.message });
+        }
+    },
+
+    async updateLocation(req, res) {
+        try {
+            const { latitude, longitude } = req.body;
+            const player = await Player.findOneAndUpdate(
+                { playerId: req.params.id },
+                {
+                    'location.latitude': latitude,
+                    'location.longitude': longitude,
+                    'location.lastUpdated': Date.now()
+                },
+                { new: true }
+            );
+            if (!player) return res.status(404).json({ message: 'Player not found' });
+            res.json(player);
+        } catch (error) {
+            res.status(400).json({ message: error.message });
         }
     }
 };

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const locationSchema = require('./Location')
 
 const playerSchema = new mongoose.Schema({
     playerId: {
@@ -42,6 +43,10 @@ const playerSchema = new mongoose.Schema({
     lastUpdate: {
         type: Date,
         default: Date.now
+    },
+    location: {
+        type: locationSchema, 
+        default: () => ({})
     }
 });
 

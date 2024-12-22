@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Database, Award, History, Wallet, LogOut } from 'lucide-react';
+import { Users, Database, Award, History, Wallet, LogOut, Map as MapIcon } from 'lucide-react';
 import PlayersList from '../resources/players/PlayersList';
 import DronesList from '../resources/drones/DronesList';
 import AchievementsList from '../resources/achievements/AchievementsList';
@@ -18,7 +18,7 @@ const Layout = () => {
         { id: 'achievements', icon: Award, label: 'Achievements' },
         { id: 'rewards', icon: History, label: 'Rewards' },
         { id: 'balances', icon: Wallet, label: 'Token Balances' },
-        { id: 'map', icon: Map, label: 'Game Map' } 
+        { id: 'map', icon: MapIcon, label: 'Game Map' } 
     ];
 
     const renderContent = () => {
@@ -33,7 +33,7 @@ const Layout = () => {
                 return <RewardsList />;
             case 'balances':
                 return <TokenBalancesList />;
-            case 'map':                
+            case 'map':                 
                 return <GameMap />;
             default:
                 return <PlayersList />;

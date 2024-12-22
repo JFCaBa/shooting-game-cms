@@ -17,7 +17,8 @@
     "react-scripts": "5.0.1",
     "tailwind-merge": "^2.5.5",
     "web-vitals": "^2.1.4",
-    "dotenv": "^16.4.5"
+    "@react-google-maps/api": "^2.19.2",
+    "@googlemaps/js-api-loader": "^1.16.2"
   },
   "scripts": {
     "start": "HOST=0.0.0.0 PORT=3002 react-scripts start",

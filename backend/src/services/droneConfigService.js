@@ -1,4 +1,3 @@
-// cms/src/services/DroneConfigService.js
 const gameServerApi = require('../utils/gameServerApi');
 const logger = require('../utils/logger');
 
