@@ -1,14 +1,17 @@
 import { useState } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Login = ({ onLogin }) => {
     const { login } = useAuth();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setIsLoading(true);
 
         try {
             const response = await fetch('/api/auth/login', {
@@ -28,6 +31,8 @@ const Login = ({ onLogin }) => {
             login(data.token);
         } catch (err) {
             setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 

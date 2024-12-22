@@ -1,4 +1,3 @@
-// cms/src/utils/gameServerApi.js
 const jwt = require('jsonwebtoken');
 
 class GameServerApi {

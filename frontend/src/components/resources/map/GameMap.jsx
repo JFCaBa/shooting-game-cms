@@ -1,41 +1,77 @@
 import React, { useState, useEffect } from 'react';
+import { GoogleMap, LoadScript, Marker, InfoWindow, MarkerClusterer, Icon } from '@react-google-maps/api';
 import { api } from '../../../utils/api';
-import { Map as MapIcon, Crosshair } from 'lucide-react';
+import { Loader } from 'lucide-react';
+
+const containerStyle = {
+  width: '100%',
+  height: '600px'
+};
+
+const defaultCenter = {
+  lat: 0,
+  lng: 0
+};
 
 const GameMap = () => {
   const [players, setPlayers] = useState([]);
-  const [drones, setDrones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [map, setMap] = useState(null);
+  const [mapLoaded, setMapLoaded] = useState(false);
+
+  const fetchPlayers = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/players');
+      if (response && response.data) {
+        setPlayers(response.data);
+        setError(null);
+      }
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching players:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [playersData, dronesData] = await Promise.all([
-          api.get('/players'),
-          api.get('/drones')
-        ]);
-        setPlayers(playersData);
-        setDrones(dronesData);
-        setError(null);
-      } catch (err) {
-        setError(err.message);
-        console.error('Error fetching map data:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-    // Refresh every 5 seconds
-    const interval = setInterval(fetchData, 5000);
+    fetchPlayers();
+    const interval = setInterval(fetchPlayers, 5000);
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) {
+  const onLoad = React.useCallback(function callback(map) {
+    setMap(map);
+  }, []);
+
+  const onUnmount = React.useCallback(function callback(map) {
+    setMap(null);
+  }, []);
+
+  useEffect(() => {
+    if (map && players.length > 0 && !mapLoaded) {
+      const bounds = new window.google.maps.LatLngBounds();
+      players
+        .filter(player => player.location?.latitude && player.location?.longitude)
+        .forEach(player => {
+          bounds.extend({
+            lat: player.location.latitude,
+            lng: player.location.longitude
+          });
+        });
+      map.fitBounds(bounds);
+      setMapLoaded(true);
+    }
+  }, [map, players, mapLoaded]);
+
+  if (loading && !map) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-600">Loading map data...</div>
+        <Loader className="w-6 h-6 text-blue-500 animate-spin" />
+        <span className="ml-2 text-gray-600">Loading map...</span>
       </div>
     );
   }
@@ -53,89 +89,100 @@ const GameMap = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Game Map</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Players Map</h1>
           <p className="text-sm text-gray-500 mt-1">
-            Real-time view of players and drones
+            Real-time geographical view of players
           </p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-            <span className="text-sm text-gray-600">Players ({players.length})</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-red-500"></div>
-            <span className="text-sm text-gray-600">Drones ({drones.length})</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-lg p-4">
-        <div className="relative w-full" style={{ paddingBottom: '75%' }}>
-          <div className="absolute inset-0 bg-gray-100 rounded-lg">
-            {/* Map grid lines */}
-            <div className="absolute inset-0 grid grid-cols-8 grid-rows-6">
-              {Array.from({ length: 48 }).map((_, i) => (
-                <div key={i} className="border border-gray-200"></div>
-              ))}
-            </div>
-
-            {/* Players */}
-            {players.map((player) => (
-              <div
-                key={player.playerId}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`
-                }}
-              >
-                <div className="relative group">
-                  <MapIcon className="w-6 h-6 text-blue-500" />
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    {player.playerId}
-                  </div>
-                </div>
-              </div>
-            ))}
-
-            {/* Drones */}
-            {drones.map((drone) => (
-              <div
-                key={drone.droneId}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2"
-                style={{
-                  left: `${Math.random() * 100}%`,
-                  top: `${Math.random() * 100}%`
-                }}
-              >
-                <div className="relative group">
-                  <Crosshair className="w-6 h-6 text-red-500" />
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                    {drone.droneId}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+          <span className="text-sm text-gray-600">
+            Active Players ({players.filter(p => p.location?.latitude && p.location?.longitude).length})
+          </span>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Active Players</div>
+          <div className="text-sm text-gray-500">Total Players</div>
           <div className="text-2xl font-bold text-blue-600">{players.length}</div>
         </div>
         <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Active Drones</div>
-          <div className="text-2xl font-bold text-red-600">{drones.length}</div>
-        </div>
-        <div className="bg-white rounded-lg shadow p-4">
-          <div className="text-sm text-gray-500">Total Entities</div>
-          <div className="text-2xl font-bold text-purple-600">
-            {players.length + drones.length}
+          <div className="text-sm text-gray-500">Located Players</div>
+          <div className="text-2xl font-bold text-green-600">
+            {players.filter(p => p.location?.latitude && p.location?.longitude).length}
           </div>
         </div>
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="text-sm text-gray-500">Unlocated Players</div>
+          <div className="text-2xl font-bold text-gray-600">
+            {players.filter(p => !p.location?.latitude || !p.location?.longitude).length}
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <LoadScript googleMapsApiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}>
+          <GoogleMap
+            mapContainerStyle={containerStyle}
+            center={defaultCenter}
+            zoom={2}
+            onLoad={onLoad}
+            onUnmount={onUnmount}
+            options={{
+              styles: [
+                {
+                  featureType: 'poi',
+                  elementType: 'labels',
+                  stylers: [{ visibility: 'off' }]
+                }
+              ]
+            }}
+          >
+            <MarkerClusterer>
+              {(clusterer) =>
+                players
+                  .filter(player => player.location?.latitude && player.location?.longitude)
+                  .map(player => (
+                    <Marker
+                      key={player.playerId}
+                      position={{
+                        lat: player.location.latitude,
+                        lng: player.location.longitude
+                      }}
+                      onClick={() => setSelectedPlayer(player)}
+                      clusterer={clusterer}
+                      icon={{
+                        path: window.google.maps.SymbolPath.CIRCLE,
+                        scale: 8,
+                        fillColor: '#4285F4',
+                        fillOpacity: 1,
+                        strokeColor: 'white',
+                        strokeWeight: 2,
+                      }}
+                    />
+                  ))
+              }
+            </MarkerClusterer>
+            
+            {selectedPlayer && (
+              <InfoWindow
+                position={{
+                  lat: selectedPlayer.location.latitude,
+                  lng: selectedPlayer.location.longitude
+                }}
+                onCloseClick={() => setSelectedPlayer(null)}
+              >
+                <div className="p-2">
+                  <h3 className="font-bold">{selectedPlayer.playerId}</h3>
+                  <p className="text-sm">
+                    Last active: {new Date(selectedPlayer.lastActive).toLocaleString()}
+                  </p>
+                </div>
+              </InfoWindow>
+            )}
+          </GoogleMap>
+        </LoadScript>
       </div>
     </div>
   );

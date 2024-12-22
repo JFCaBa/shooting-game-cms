@@ -47,6 +47,14 @@ const droneValidation = {
     ])
 };
 
+const geoObjectValidation = {
+    update: validate([
+        param('id').notEmpty().withMessage('GeoObject ID is required'),
+        body('location.latitude').optional().isNumeric().withMessage('Latitude must be a number'),
+        body('location.longitude').optional().isNumeric().withMessage('Longitude must be a number'),
+    ])
+};
+
 // Player Validations
 const playerValidation = {
     getAll: paginationValidation.validate,
@@ -127,6 +135,7 @@ const achievementValidation = {
 module.exports = {
     playerValidation,
     droneValidation,
+    geoObjectValidation,
     playerValidation,
     tokenBalanceValidation,
     rewardHistoryValidation,
