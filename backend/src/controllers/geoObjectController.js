@@ -5,7 +5,6 @@ const gameServer = require('../services/gameServer');
 const geoObjectController = {
     async assign(req, res) {
         try {
-          logger.info('Assigning geo object:', req.body);
           const result = await gameServer.assignGeoObject(req.body);
           res.json(result);
         } catch (error) {
