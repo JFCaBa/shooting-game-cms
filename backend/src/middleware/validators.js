@@ -48,10 +48,27 @@ const droneValidation = {
 };
 
 const geoObjectValidation = {
+    create: validate([
+        body('id').notEmpty().withMessage('ID is required'),
+        body('type').isIn(['weapon', 'target', 'powerup']).withMessage('Invalid type'),
+        body('coordinate.latitude').isFloat().withMessage('Latitude must be a number'),
+        body('coordinate.longitude').isFloat().withMessage('Longitude must be a number'),
+        body('coordinate.altitude').isFloat().withMessage('Altitude must be a number'),
+        body('metadata.reward').optional().isNumeric().withMessage('Reward must be a number'),
+        body('metadata.spawnedAt').optional().isISO8601().withMessage('Invalid date format')
+    ]),
     update: validate([
-        param('id').notEmpty().withMessage('GeoObject ID is required'),
-        body('location.latitude').optional().isNumeric().withMessage('Latitude must be a number'),
-        body('location.longitude').optional().isNumeric().withMessage('Longitude must be a number'),
+        param('id').notEmpty().withMessage('ID is required'),
+        body('type').optional().isIn(['weapon', 'target', 'powerup']).withMessage('Invalid type'),
+        body('coordinate.latitude').optional().isFloat().withMessage('Latitude must be a number'),
+        body('coordinate.longitude').optional().isFloat().withMessage('Longitude must be a number'),
+        body('coordinate.altitude').optional().isFloat().withMessage('Altitude must be a number'),
+        body('metadata.reward').optional().isNumeric().withMessage('Reward must be a number'),
+        body('metadata.spawnedAt').optional().isISO8601().withMessage('Invalid date format')
+    ]),
+    assign: validate([
+        body('geoObjectId').notEmpty().withMessage('Geo Object ID is required'),
+        body('playerId').notEmpty().withMessage('Player ID is required')
     ])
 };
 

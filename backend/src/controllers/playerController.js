@@ -99,6 +99,25 @@ const playerController = {
         } catch (error) {
             res.status(400).json({ message: error.message });
         }
+    },
+
+    async deleteEmptyIds(req, res) {
+        try {
+            const result = await Player.deleteMany({
+                $or: [
+                    { playerId: { $eq: '' } },
+                    { playerId: { $eq: null } },
+                    { playerId: { $exists: false } }
+                ]
+            });
+            
+            res.json({
+                message: 'Empty player IDs cleaned up',
+                deletedCount: result.deletedCount
+            });
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
     }
 };
 

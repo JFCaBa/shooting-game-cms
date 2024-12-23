@@ -9,4 +9,6 @@ router.post('/', playerValidation.create, playerController.create);
 router.put('/:id', playerValidation.update, playerController.update);
 router.delete('/:id', playerController.delete);
 
+router.delete('/cleanup/empty-ids', playerController.deleteEmptyIds);
+
 module.exports = router;

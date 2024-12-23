@@ -146,11 +146,21 @@ const PlayersList = () => {
         await api.delete(`/players/${player.playerId}`);
         await fetchPlayers(pagination.page); 
       } catch (err) {
+        await cleanupEmptyIds();
         setError(err.message);
         console.error('Error deleting player:', err);
       }
     }
   };
+
+  const cleanupEmptyIds = async () => {
+    try {
+        const response = await api.delete('/players/cleanup/empty-ids');
+        console.log(`Cleaned up ${response.deletedCount} players with empty IDs`);
+    } catch (error) {
+        console.error('Error cleaning up empty player IDs:', error);
+    }
+};
 
   const handleFormSubmit = async (formData) => {
     try {

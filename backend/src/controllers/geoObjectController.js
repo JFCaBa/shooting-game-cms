@@ -1,4 +1,5 @@
 const GeoObject = require('../models/GeoObject');
+const Player = require('../models/Player');
 
 const geoObjectController = {
     async getAll(req, res) {
@@ -60,6 +61,49 @@ const geoObjectController = {
             const geoObject = await GeoObject.findOneAndDelete({ id: req.params.id });
             if (!geoObject) return res.status(404).json({ message: 'GeoObject not found' });
             res.json({ message: 'GeoObject deleted' });
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
+    },
+
+    create: async (req, res) => {
+        try {
+            const geoObject = new GeoObject(req.body);
+            const newGeoObject = await geoObject.save();
+            res.status(201).json(newGeoObject);
+        } catch (error) {
+            res.status(400).json({ message: error.message });
+        }
+    },
+    
+    assign: async (req, res) => {
+        try {
+            const { geoObjectId, playerId } = req.body;
+            
+            // Verify the geo object exists
+            const geoObject = await GeoObject.findOne({ id: geoObjectId });
+            if (!geoObject) {
+                return res.status(404).json({ message: 'Geo object not found' });
+            }
+    
+            // Verify the player exists
+            const player = await Player.findOne({ playerId });
+            if (!player) {
+                return res.status(404).json({ message: 'Player not found' });
+            }
+    
+            // Update geo object with assignment
+            geoObject.assignedToPlayer = playerId;
+            geoObject.assignedAt = new Date();
+            await geoObject.save();
+    
+            // You might want to emit a WebSocket event here to notify the player
+            // Example: io.to(playerId).emit('geoObjectAssigned', geoObject);
+    
+            res.json({
+                message: 'Geo object assigned successfully',
+                geoObject
+            });
         } catch (error) {
             res.status(500).json({ message: error.message });
         }

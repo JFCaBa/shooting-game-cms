@@ -13,6 +13,7 @@ const authRoutes = require('./routes/authRoutes');
 const authMiddleware = require('./middleware/authMiddleware');
 const droneConfigRoutes = require('./routes/droneConfigRoutes');
 const mapRoutes = require('./routes/mapRoutes');
+const geoObjectRoutes = require('./routes/geoObjectRoutes');
 
 
 const app = express();
@@ -33,6 +34,7 @@ app.use('/api/achievements', authMiddleware, achievementRoutes);
 app.use('/api/rewards', authMiddleware, rewardHistoryRoutes);
 app.use('/api/token-balances', authMiddleware, tokenBalanceRoutes);
 app.use('/api/drone-config', authMiddleware, droneConfigRoutes);
+app.use('/api/geo-objects', authMiddleware, geoObjectRoutes);
 app.use('/api/map', authMiddleware, mapRoutes);
 
 

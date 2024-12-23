@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Users, Database, Award, History, Wallet, LogOut, Map as MapIcon } from 'lucide-react';
+import { Users, Database, Award, History, Wallet, LogOut, Earth, Map as MapIcon } from 'lucide-react';
 import PlayersList from '../resources/players/PlayersList';
 import DronesList from '../resources/drones/DronesList';
 import AchievementsList from '../resources/achievements/AchievementsList';
 import RewardsList from '../resources/rewards/RewardsList';
 import TokenBalancesList from '../resources/token-balances/TokenBalancesList';
 import GameMap from '../resources/map/GameMap';
+import GeoObjects from '../resources/geo-objects/GeoObjectsList';
 import { useAuth } from '../../contexts/AuthContext';
 
 const Layout = () => {
@@ -18,6 +19,7 @@ const Layout = () => {
         { id: 'achievements', icon: Award, label: 'Achievements' },
         { id: 'rewards', icon: History, label: 'Rewards' },
         { id: 'balances', icon: Wallet, label: 'Token Balances' },
+        { id: 'geoObject', icon: Earth, label: 'Geo Objects' },
         { id: 'map', icon: MapIcon, label: 'Game Map' } 
     ];
 
@@ -33,6 +35,8 @@ const Layout = () => {
                 return <RewardsList />;
             case 'balances':
                 return <TokenBalancesList />;
+            case 'geoObject':
+                return <GeoObjects />;
             case 'map':                 
                 return <GameMap />;
             default:
