@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 class GameServerApi {
     constructor() {
@@ -6,18 +7,24 @@ class GameServerApi {
     }
 
     generateServiceToken() {
+        const secret = process.env.SERVICE_SECRET;
+        if (!secret) {
+            console.error('SERVICE_SECRET is missing.');
+            throw new Error('SERVICE_SECRET is not configured');
+        }
         return jwt.sign(
-            { 
+            {
                 service: 'cms',
-                timestamp: Date.now()
+                timestamp: Date.now(),
             },
-            process.env.SERVICE_SECRET,
+            secret,
             { expiresIn: '1h' }
         );
     }
 
     async request(endpoint, options = {}) {
         const serviceToken = this.generateServiceToken();
+        console.log(`Service token: ${serviceToken}`);
 
         const response = await fetch(`${this.baseUrl}${endpoint}`, {
             ...options,

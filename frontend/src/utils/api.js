@@ -1,43 +1,51 @@
-const BASE_URL = '/api';
+
+const BASE_URL = process.env.REACT_APP_API_BASE_URL || '/api';
 
 const getAuthHeader = () => {
   const token = localStorage.getItem('token');
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  };
+  return token
+    ? {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      }
+    : {
+        'Content-Type': 'application/json',
+      };
 };
 
 const handleResponse = async (response) => {
   if (!response.ok) {
-    let errorData;
-    try {
-      errorData = await response.json();
-    } catch (e) {
-      errorData = { message: 'An error occurred' };
-    }
-    
     if (response.status === 401) {
+      console.warn('Unauthorized access. Redirecting to login...');
       localStorage.removeItem('token');
-      window.location.href = '/';
+      window.location.href = '/'; // Redirect to the login page
       return null;
     }
-    
-    throw new Error(errorData.message || 'API request failed');
+
+    if (response.headers.get('Content-Type')?.includes('application/json')) {
+      const error = await response.json();
+      throw new Error(error.message || `Request failed with status ${response.status}`);
+    } else {
+      throw new Error(`Unexpected response: ${response.statusText}`);
+    }
   }
-  
-  return response.json();
+
+  if (response.headers.get('Content-Type')?.includes('application/json')) {
+    return response.json();
+  }
+
+  return response.text(); // Return plain text for non-JSON responses
 };
 
 export const api = {
   get: async (endpoint) => {
     try {
       const response = await fetch(`${BASE_URL}${endpoint}`, {
-        headers: getAuthHeader()
+        headers: getAuthHeader(),
       });
-      return handleResponse(response);
+      return await handleResponse(response);
     } catch (err) {
-      console.error('API Error:', err);
+      console.error(`[API GET] ${endpoint} -`, err.message);
       throw err;
     }
   },
@@ -47,11 +55,11 @@ export const api = {
       const response = await fetch(`${BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: getAuthHeader(),
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
-      return handleResponse(response);
+      return await handleResponse(response);
     } catch (err) {
-      console.error('API Error:', err);
+      console.error(`[API POST] ${endpoint} -`, err.message);
       throw err;
     }
   },
@@ -61,11 +69,11 @@ export const api = {
       const response = await fetch(`${BASE_URL}${endpoint}`, {
         method: 'PUT',
         headers: getAuthHeader(),
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
-      return handleResponse(response);
+      return await handleResponse(response);
     } catch (err) {
-      console.error('API Error:', err);
+      console.error(`[API PUT] ${endpoint} -`, err.message);
       throw err;
     }
   },
@@ -74,12 +82,12 @@ export const api = {
     try {
       const response = await fetch(`${BASE_URL}${endpoint}`, {
         method: 'DELETE',
-        headers: getAuthHeader()
+        headers: getAuthHeader(),
       });
-      return handleResponse(response);
+      return await handleResponse(response);
     } catch (err) {
-      console.error('API Error:', err);
+      console.error(`[API DELETE] ${endpoint} -`, err.message);
       throw err;
     }
-  }
+  },
 };

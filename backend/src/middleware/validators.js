@@ -67,7 +67,6 @@ const geoObjectValidation = {
         body('metadata.spawnedAt').optional().isISO8601().withMessage('Invalid date format')
     ]),
     assign: validate([
-        body('geoObjectId').notEmpty().withMessage('Geo Object ID is required'),
         body('playerId').notEmpty().withMessage('Player ID is required')
     ])
 };

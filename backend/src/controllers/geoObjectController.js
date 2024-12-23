@@ -1,7 +1,19 @@
 const GeoObject = require('../models/GeoObject');
-const Player = require('../models/Player');
+const logger = require('../utils/logger');
+const gameServer = require('../services/gameServer');
 
 const geoObjectController = {
+    async assign(req, res) {
+        try {
+          logger.info('Assigning geo object:', req.body);
+          const result = await gameServer.assignGeoObject(req.body);
+          res.json(result);
+        } catch (error) {
+          logger.error('Failed to assign geo object:', error);
+          res.status(error.response?.status || 500).json({ message: error.message });
+        }
+      },
+
     async getAll(req, res) {
         try {
             const page = parseInt(req.query.page) || 1;
@@ -74,41 +86,8 @@ const geoObjectController = {
         } catch (error) {
             res.status(400).json({ message: error.message });
         }
-    },
-    
-    assign: async (req, res) => {
-        try {
-            const { geoObjectId, playerId } = req.body;
-            
-            // Verify the geo object exists
-            const geoObject = await GeoObject.findOne({ id: geoObjectId });
-            if (!geoObject) {
-                return res.status(404).json({ message: 'Geo object not found' });
-            }
-    
-            // Verify the player exists
-            const player = await Player.findOne({ playerId });
-            if (!player) {
-                return res.status(404).json({ message: 'Player not found' });
-            }
-    
-            // Update geo object with assignment
-            geoObject.assignedToPlayer = playerId;
-            geoObject.assignedAt = new Date();
-            await geoObject.save();
-    
-            // You might want to emit a WebSocket event here to notify the player
-            // Example: io.to(playerId).emit('geoObjectAssigned', geoObject);
-    
-            res.json({
-                message: 'Geo object assigned successfully',
-                geoObject
-            });
-        } catch (error) {
-            res.status(500).json({ message: error.message });
-        }
     }
+
 };
 
 module.exports = geoObjectController;
-

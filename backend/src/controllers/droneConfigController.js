@@ -1,7 +1,6 @@
-// src/controllers/droneConfigController.js
 const DroneConfig = require('../models/DroneConfig');
 const DroneConfigService = require('../services/droneConfigService');
-
+const logger = require('../utils/logger');
 
 exports.updateConfig = async (req, res) => {
     try {

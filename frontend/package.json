@@ -19,7 +19,9 @@
     "web-vitals": "^2.1.4",
     "@react-google-maps/api": "^2.19.2",
     "@googlemaps/js-api-loader": "^1.16.2",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "axios": "^1.6.7",
+    "winston": "^3.11.0"
   },
   "scripts": {
     "start": "HOST=0.0.0.0 PORT=3002 react-scripts start",
