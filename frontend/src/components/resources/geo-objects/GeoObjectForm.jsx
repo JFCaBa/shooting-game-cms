@@ -62,7 +62,18 @@ const GeoObjectForm = ({ onSubmit, onClose }) => {
   };
 
   const handlePlayerChange = (e) => {
-    setSelectedPlayer(e.target.value);
+    const playerId = e.target.value;
+    setSelectedPlayer(playerId);
+
+
+    const player = players.find(p => p.playerId === playerId);
+    if (player?.location) {
+      setLocation({
+        latitude: player.location.latitude || 0,
+        longitude: player.location.longitude || 0,
+        altitude: player.location.altitude || 0
+      });
+    }
   };
 
   const handleLocationChange = (e) => {
