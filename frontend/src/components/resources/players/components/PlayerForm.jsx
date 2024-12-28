@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 const PlayerForm = ({ player = null, onSubmit, onClose }) => {
   const [formData, setFormData] = useState({
     playerId: '',
+    nickName: '',
     walletAddress: '',
     stats: {
       kills: 0,

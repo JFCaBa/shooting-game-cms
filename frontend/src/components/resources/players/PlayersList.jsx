@@ -18,17 +18,17 @@ const PlayersList = () => {
   });
 
   const columns = [
-    { 
-      key: 'playerId', 
-      label: 'Player ID',
+    {
+      key: 'playerId',
+      label: 'Player',
       filterable: true,
       filterType: 'text',
-      format: (value) => (
+      format: (value, row) => (
         <div className="font-mono text-xs sm:text-sm break-all sm:break-normal">
-          {value}
+          {(row?.nickName || value)}
         </div>
       )
-    },
+     },
     { 
       key: 'stats.kills', 
       label: 'Kills',

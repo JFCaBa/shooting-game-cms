@@ -93,8 +93,6 @@ const GeoObjectForm = ({ onSubmit, onClose }) => {
       return;
     }
   
-    console.log('Submitting:', { playerId, location }); // Log payload
-  
     try {
       await api.post('/geo-objects/assign', {
         playerId,

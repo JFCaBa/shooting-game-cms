@@ -12,6 +12,10 @@ const playerSchema = new mongoose.Schema({
         required: false,
         default: null
     },
+    nickName: {
+        type: String,
+        required: false
+    },
     pushToken: {
         type: String,
         default: null
